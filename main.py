@@ -4,7 +4,14 @@ import os
 from pynput.keyboard import Key, Listener, KeyCode
 
 # Detect if connected to bridge
-wifi_name = open(f'{os.path.expanduser("~")}/wifi/name.txt', 'r').read()
+project_dir = f'{os.path.expanduser("~")}/wifi'
+
+wifi_name = open(f'{project_dir}/name', 'r').read()
+cookies = open(f'{project_dir}/cookies', 'r').read()
+login = open(f'{project_dir}/login', 'r').read().split('\n')
+login_data = {'username': login[0], 'password': login[1]}
+
+session = requests.Session()
 
 
 def wifi_on():
@@ -14,12 +21,15 @@ def wifi_on():
 def reconnect():
     print("Hotkey pressed")
     # Send POST to log in
-    #if wifi_on():
-        #requests.post("https://www.btwifi.com:8443", ...)
+    # if wifi_on():
+    # requests.post("https://www.btwifi.com:8443", ...)
+    if wifi_on():
+        f = session.post("https://www.btwifi.com:8443/tbbLogon", data=login_data)
+        print(f.status_code)
 
 
-if wifi_on():  # Connected
-    r = requests.get("https://www.btwifi.com:8443")
+if wifi_on():
+    r = session.get("https://www.btwifi.com:8443")
     if "bthub-loginForm__toggleButton" in r.text:
         print("Logged out")
         reconnect()
@@ -29,14 +39,14 @@ if wifi_on():  # Connected
 # Have to wait to be logged out of WiFi to continue...
 # Implement hotkey to attempt reconnection on press
 
-combo = (Key.shift, KeyCode.from_char("¬"))
+combo = {Key.shift, KeyCode.from_char("¬")}
 current = set()
 
 
 def on_press(key):
     if key in combo:
         current.add(key)
-        if set(combo) == current:
+        if combo == current:
             reconnect()
 
 
