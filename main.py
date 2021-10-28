@@ -4,11 +4,9 @@ import os
 from pynput.keyboard import Key, Listener, KeyCode
 
 # Detect if connected to bridge
-project_dir = f'{os.path.expanduser("~")}/wifi'
-
-wifi_name = open(f'{project_dir}/name', 'r').read()
-cookies = open(f'{project_dir}/cookies', 'r').read()
-login = open(f'{project_dir}/login', 'r').read().split('\n')
+wifi_name = open('./data/name', 'r').read()
+cookies = open('./data/cookies', 'r').read()
+login = open('./data/login', 'r').read().split('\n')
 login_data = {'username': login[0], 'password': login[1]}
 
 session = requests.Session()
@@ -30,9 +28,10 @@ def reconnect():
 
 if wifi_on():
     r = session.get("https://www.btwifi.com:8443")
+    print(r.text)
     if "bthub-loginForm__toggleButton" in r.text:
         print("Logged out")
-        reconnect()
+    #    reconnect()
     else:
         print("Logged in")
 
